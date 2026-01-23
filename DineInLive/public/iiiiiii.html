@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMinder | Smart Mess Management System</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --light: #f9fafb;
+            --dark: #1f2937;
+            --gray: #9ca3af;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .hero {
+            margin-top: 5rem;
+            padding: 6rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            background: linear-gradient(135deg, #f6f9ff 0%, #eef2ff 100%);
+        }
+        
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .hero-image {
+            flex: 1;
+            max-width: 550px;
+            position: relative;
+        }
+        
+        .features {
+            padding: 5rem 5%;
+            background-color: white;
+            text-align: center;
+        }
+        
+        .section-header {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 2.25rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+            background-color: #e0e7ff;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-desc {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .testimonials {
+            padding: 5rem 5%;
+            background-color: #f3f4f6;
+        }
+        
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .testimonial-content {
+            font-style: italic;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .author-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: #e0e7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .author-name {
+            font-weight: 600;
+        }
+        
+        .author-role {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .cta {
+            padding: 5rem 5%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+        }
+        
+        .cta-form {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 0.5rem;
+        }
+        
+        .cta-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            outline: none;
+        }
+        
+        .footer {
+            padding: 3rem 5%;
+            background-color: var(--dark);
+            color: white;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-desc {
+            max-width: 300px;
+            color: #d1d5db;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .footer-links h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        .floating-card {
+            position: absolute;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .fc-1 {
+            top: 30%;
+            left: -10%;
+        }
+        
+        .fc-2 {
+            bottom: 20%;
+            right: -5%;
+        }
+        
+        .fc-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #e0e7ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        
+        .fc-content h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .fc-content p {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                padding: 4rem 5% 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .floating-card {
+                position: static;
+                margin: 1rem 0;
+            }
+            
+            .hero-stats {
+                justify-content: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-utensils"></i>
+            <span>MealMinder</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </div>
+        <div class="nav-buttons">
+            <a href="#" class="btn btn-outline">Login</a>
+            <a href="#" class="btn btn-primary">Sign Up Free</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Streamline Your Mess Management With Smart Solutions</h1>
+            <p class="hero-subtitle">Efficient meal planning, attendance tracking, billing, and feedback management all in one platform. Save time, reduce waste, and improve dining experience.</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-primary">Get Started For Free</a>
+                <a href="#" class="btn btn-outline">Watch Demo <i class="fas fa-play-circle"></i></a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-value">500+</span>
+                    <span class="stat-label">Mess Facilities</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">100K+</span>
+                    <span class="stat-label">Users Served</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">98%</span>
+                    <span class="stat-label">Satisfaction Rate</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="/api/placeholder/550/400" alt="Mess Management Dashboard" />
+            
+            <div class="floating-card fc-1">
+                <div class="fc-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="fc-content">
+                    <h4>Daily Attendance</h4>
+                    <p>92% Present Today</p>
+                </div>
+            </div>
+            
+            <div class="floating-card fc-2">
+                <div class="fc-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="fc-content">
+                    <h4>Food Waste</h4>
+                    <p>Reduced by 40%</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="section-header">
+            <h2 class="section-title">Powerful Features That Make A Difference</h2>
+            <p class="section-subtitle">Our comprehensive mess management system is designed to address all aspects of mess operations, from attendance tracking to feedback collection.</p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3 class="feature-title">Smart Attendance Tracking</h3>
+                <p class="feature-desc">Automate attendance with QR scanning, facial recognition, or manual entry. Generate reports and analyze patterns for better resource planning.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="feature-title">Meal Planning & Menu Management</h3>
+                <p class="feature-desc">Create balanced meal plans, manage rotating menus, track nutrition, and accommodate dietary restrictions with ease.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <h3 class="feature-title">Automated Billing</h3>
+                <p class="feature-desc">Generate accurate bills based on attendance, special meals, and extras. Support multiple payment methods and send automated reminders.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3 class="feature-title">Inventory & Supply Management</h3>
+                <p class="feature-desc">Track ingredient usage, manage suppliers, set up auto-ordering thresholds, and minimize waste with intelligent forecasting.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3 class="feature-title">Feedback & Rating System</h3>
+                <p class="feature-desc">Collect meal ratings, suggestions, and complaints through a user-friendly interface. Use insights to improve satisfaction.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Comprehensive Analytics</h3>
+                <p class="feature-desc">Visualize attendance patterns, food preferences, cost trends, and satisfaction metrics to make data-driven decisions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="section-header">
+            <h2 class="section-title">Trusted By Mess Managers Everywhere</h2>
+            <p class="section-subtitle">Hear what our customers have to say about how MealMinder transformed their mess operations.</p>
+        </div>
+        
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-content">"Since implementing MealMinder, we've reduced food waste by 38% and improved student satisfaction scores by over 50%. The attendance tracking feature alone saved us countless hours of administrative work."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JD</div>
+                    <div class="author-info">
+                        <div class="author-name">John Donovan</div>
+                        <div class="author-role">University Dining Director</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <p class="testimonial-content">"The billing accuracy and automated payment reminders have eliminated the payment delays we used to face. Our cash flow improved dramatically, and students appreciate the transparency in their mess bills."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SP</div>
+                    <div class="author-info">
+                        <div class="author-name">Sarah Park</div>
+                        <div class="author-role">Hostel Superintendent</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <p class="testimonial-content">"As a corporate cafeteria manager, I've tried several solutions, but MealMinder stands out with its intuitive interface and comprehensive feature set. The analytics have helped us optimize our menu to match employee preferences."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">RK</div>
+                    <div class="author-info">
+                        <div class="author-name">Raj Kumar</div>
+                        <div class="author-role">Corporate Facilities Manager</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta">
+        <h2 class="cta-title">Ready to Transform Your Mess Management?</h2>
+        <p class="cta-subtitle">Join hundreds of satisfied mess managers who have streamlined their operations with MealMinder. Get started with a free 30-day trial.</p>
+        <form class="cta-form">
+            <input type="email" class="cta-input" placeholder="Enter your email address">
+            <button type="submit" class="btn btn-primary">Start Free Trial</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-utensils"></i> MealMinder
+                </div>
+                <p class="footer-desc">Streamlining mess management with smart, user-friendly solutions that save time, reduce waste, and improve dining experiences.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Product</h3>
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">Case Studies</a>
+                <a href="#">Integrations</a>
+                <a href="#">API Documentation</a>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Resources</h3>
+                <a href="#">Blog</a>
+                <a href="#">Tutorials</a>
+                <a href="#">Help Center</a>
+                <a href="#">Community</a>
+                <a href="#">Webinars</a>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Company</h3>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Contact Us</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2025 MealMinder. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>
+
+
+<!-- <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Boost Your Sales</h3>
+                <p>Increase your revenue with access to our growing customer base looking for quality dining options.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3>Seamless Delivery</h3>
+                <p>Our reliable delivery network ensures your food reaches customers hot and fresh every time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Smart Technology</h3>
+                <p>Manage orders, track deliveries, and analyze performance with our easy-to-use dashboard.</p>
+            </div>
+        </div> -->
