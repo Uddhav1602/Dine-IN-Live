@@ -56,46 +56,47 @@
     Database: MongoDB
   
   4. 📁 Project Structure
-    DINE IN LIVE R/
-    │
-    ├── Backend/
-    │   └── server/
-    │       ├── global2.js
-    │       ├── package.json
-    │       └── package-lock.json
-    │
-    ├── DineInLive/
-    │   ├── public/
-    │   ├── src/
-    │   │   ├── assets/
-    │   │   ├── components/
-    │   │   │   ├── Header.jsx
-    │   │   │   └── Footer.jsx
-    │   │   ├── pages/
-    │   │   │   ├── AdminPanel.jsx
-    │   │   │   ├── Favorites.jsx
-    │   │   │   ├── Home.jsx
-    │   │   │   ├── Login.jsx
-    │   │   │   ├── MessDetails.jsx
-    │   │   │   ├── MessOwner.jsx
-    │   │   │   ├── MessOwnerDashBoard.jsx
-    │   │   │   ├── OrderHistory.jsx
-    │   │   │   ├── PartnerInfo.jsx
-    │   │   │   ├── PartnerWithUs.jsx
-    │   │   │   ├── Profile.jsx
-    │   │   │   └── SearchMess.jsx
-    │   │   ├── App.jsx
-    │   │   └── main.jsx
-    │   │
-    │   ├── index.html
-    │   ├── package.json
-    │   ├── tailwind.config.js
-    │   ├── postcss.config.js
-    │   └── vite.config.js
-    │
-    └── README.md
+
+          DINE IN LIVE R/
+          │
+          ├── Backend/
+          │   └── server/
+          │       ├── global2.js
+          │       ├── package.json
+          │       └── package-lock.json
+          │
+          ├── DineInLive/
+          │   ├── public/
+          │   ├── src/
+          │   │   ├── assets/
+          │   │   ├── components/
+          │   │   │   ├── Header.jsx
+          │   │   │   └── Footer.jsx
+          │   │   ├── pages/
+          │   │   │   ├── AdminPanel.jsx
+          │   │   │   ├── Favorites.jsx
+          │   │   │   ├── Home.jsx
+          │   │   │   ├── Login.jsx
+          │   │   │   ├── MessDetails.jsx
+          │   │   │   ├── MessOwner.jsx
+          │   │   │   ├── MessOwnerDashBoard.jsx
+          │   │   │   ├── OrderHistory.jsx
+          │   │   │   ├── PartnerInfo.jsx
+          │   │   │   ├── PartnerWithUs.jsx
+          │   │   │   ├── Profile.jsx
+          │   │   │   └── SearchMess.jsx
+          │   │   ├── App.jsx
+          │   │   └── main.jsx
+          │   │
+          │   ├── index.html
+          │   ├── package.json
+          │   ├── tailwind.config.js
+          │   ├── postcss.config.js
+          │   └── vite.config.js
+          │
+          └── README.md
   
-  5. 🔗 API Overview
+  6. 🔗 API Overview
     Auth
     
       POST /register
