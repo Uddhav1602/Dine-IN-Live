@@ -13,7 +13,7 @@ app.use(express.json());
    1. MongoDB Connection
 ================================ */
 mongoose
-  .connect("mongodb://127.0.0.1:27017/dineinlive")
+  .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/dineinlive")
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   password: { type: String, required: true },
+  role: { type: String, enum: ["user", "mess_owner", "admin"], default: "user" },
 });
 const User = mongoose.model("User", UserSchema);
 
@@ -80,11 +81,28 @@ const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, "secretkey", (err, decoded) => { // NOTE: Changed process.env.JWT_SECRET to "secretkey" to match your Login route below
+  jwt.verify(token, process.env.JWT_SECRET || "secretkey", (err, decoded) => {
     if (err) return res.status(401).json({ error: "Unauthorized" });
     req.userId = decoded.userId;
+    req.role = decoded.role; // Attach role to request
     next();
   });
+};
+
+// Admin-only middleware
+const verifyAdmin = (req, res, next) => {
+  if (req.role !== "admin") {
+    return res.status(403).json({ error: "Access denied: Admins only" });
+  }
+  next();
+};
+
+// Mess Owner (or Admin) middleware
+const verifyMessOwner = (req, res, next) => {
+  if (req.role !== "mess_owner" && req.role !== "admin") {
+    return res.status(403).json({ error: "Access denied: Mess owners only" });
+  }
+  next();
 };
 
 /* ===============================
@@ -113,8 +131,9 @@ app.post("/register", async (req, res) => {
 
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
-  } catch {
-    res.status(500).json({ error: "Server error" });
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ error: "Server error during registration" });
   }
 });
 
@@ -135,10 +154,20 @@ app.post("/login", async (req, res) => {
             return res.status(401).json({ error: "Invalid password" });
         }
 
-        // Generate Token
-        const token = jwt.sign({ userId: user._id }, "secretkey", { expiresIn: "1h" });
-        
-        res.json({ message: "Login successful", token, userId: user._id, username: user.username }); 
+        // Generate Token — embed role so middleware can read it without a DB call
+        const token = jwt.sign(
+          { userId: user._id, role: user.role },
+          process.env.JWT_SECRET || "secretkey",
+          { expiresIn: "7d" }
+        );
+
+        res.json({
+          message: "Login successful",
+          token,
+          userId: user._id,
+          username: user.username,
+          role: user.role       // Send role to frontend
+        });
     } catch (err) {
         console.error("❌ SERVER ERROR:", err);
         res.status(500).json({ error: "Login failed due to server error" });
@@ -154,14 +183,15 @@ app.get("/api/messes", async (req, res) => {
   try {
     const messes = await Mess.find();
     res.json(messes);
-  } catch {
+  } catch (err) {
+    console.error("Fetch messes error:", err);
     res.status(500).json({ error: "Failed to fetch messes" });
   }
 });
 
 // Register Mess (UPDATED DEBUGGING)
 // Register Mess (Updated with Auth)
-app.post("/register-mess", verifyToken, async (req, res) => { // 1. Add verifyToken middleware
+app.post("/register-mess", verifyToken, async (req, res) => {
   const { name, location, fullAddress, ownerPhone, email } = req.body;
 
   if (!name || !location)
@@ -172,21 +202,33 @@ app.post("/register-mess", verifyToken, async (req, res) => { // 1. Add verifyTo
     if (existingMess)
       return res.status(409).json({ error: "Mess already exists" });
 
-    const newMess = new Mess({ 
-        name, 
-        location, 
-        fullAddress, 
-        ownerPhone, 
+    const newMess = new Mess({
+        name,
+        location,
+        fullAddress,
+        ownerPhone,
         email,
-        ownerId: req.userId // 2. LINK THE MESS TO THE USER
+        ownerId: req.userId
     });
-    
+
     await newMess.save();
+
+    // ✅ Upgrade user role to mess_owner
+    await User.findByIdAndUpdate(req.userId, { role: "mess_owner" });
+
+    // ✅ Issue a fresh JWT with the new role so frontend updates immediately
+    const freshToken = jwt.sign(
+      { userId: req.userId, role: "mess_owner" },
+      process.env.JWT_SECRET || "secretkey",
+      { expiresIn: "7d" }
+    );
 
     res.status(201).json({
       message: "Mess registered successfully",
       messId: newMess._id,
-      profilePage: '/mess-owner' 
+      token: freshToken,        // Fresh token with mess_owner role
+      role: "mess_owner",
+      profilePage: '/mess-owner'
     });
   } catch (err) {
     console.error("Registration Error:", err);
@@ -256,7 +298,8 @@ app.delete("/api/messes/:id", async (req, res) => {
   try {
     await Mess.findByIdAndDelete(req.params.id);
     res.json({ message: "Mess deleted successfully" });
-  } catch {
+  } catch (err) {
+    console.error("Delete mess error:", err);
     res.status(500).json({ error: "Could not delete mess" });
   }
 });
@@ -286,7 +329,8 @@ app.post("/api/orders", verifyToken, async (req, res) => {
       message: "Order placed successfully",
       orderId: newOrder._id,
     });
-  } catch {
+  } catch (err) {
+    console.error("Place order error:", err);
     res.status(500).json({ error: "Failed to place order" });
   }
 });
@@ -298,7 +342,8 @@ app.get("/api/user/orders", verifyToken, async (req, res) => {
       createdAt: -1,
     });
     res.json(orders);
-  } catch {
+  } catch (err) {
+    console.error("Fetch orders error:", err);
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
@@ -328,9 +373,76 @@ app.get("/api/user/profile", verifyToken, async (req, res) => {
 });
 
 /* ===============================
-   7. Start Server
+   7. Admin Routes (verifyToken + verifyAdmin)
 ================================ */
-const PORT = 5000;
+
+// Get all users (Admin only)
+app.get("/api/admin/users", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (err) {
+    console.error("Fetch admin users error:", err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// Delete a user (Admin only)
+app.delete("/api/admin/users/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("Delete user error:", err);
+    res.status(500).json({ error: "Could not delete user" });
+  }
+});
+
+// Promote a user to admin (Admin only — used to grant admin to other users)
+app.post("/api/admin/make-admin", verifyToken, verifyAdmin, async (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "Username required" });
+  try {
+    const user = await User.findOneAndUpdate(
+      { username },
+      { role: "admin" },
+      { new: true }
+    ).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ message: `${username} is now an admin`, user });
+  } catch (err) {
+    console.error("Make admin error:", err);
+    res.status(500).json({ error: "Failed to promote user" });
+  }
+});
+
+// Bootstrap: Make the FIRST admin by username — only works if NO admin exists yet
+// Use this once via: POST http://localhost:5000/api/admin/seed-admin { "username": "yourUsername" }
+app.post("/api/admin/seed-admin", async (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "Username required" });
+  try {
+    const existingAdmin = await User.findOne({ role: "admin" });
+    if (existingAdmin) {
+      return res.status(403).json({ error: "An admin already exists. Use /api/admin/make-admin instead." });
+    }
+    const user = await User.findOneAndUpdate(
+      { username },
+      { role: "admin" },
+      { new: true }
+    ).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ message: `✅ ${username} is now the first admin!`, user });
+  } catch (err) {
+    console.error("Seed admin error:", err);
+    res.status(500).json({ error: "Failed to seed admin" });
+  }
+});
+
+/* ===============================
+   8. Start Server
+================================ */
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`✅ Server running on port ${PORT}`)
 );

@@ -6,64 +6,122 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [messes, setMesses] = useState([]);
   const [activeTab, setActiveTab] = useState("users");
+  const [errorMsg, setErrorMsg] = useState("");
+  const token = localStorage.getItem("token");
 
   // Fetch users
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/users")
-      .then(res => res.json())
-      .then(data => setUsers(data));
+    fetch("http://localhost:5000/api/admin/users", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Could not fetch users");
+        return res.json();
+      })
+      .then(data => setUsers(data))
+      .catch(err => {
+        console.error("Admin fetch users error:", err);
+        setErrorMsg("Failed to connect to the backend server.");
+      });
   }, []);
 
   // Fetch messes
   useEffect(() => {
     fetch("http://localhost:5000/api/messes")
-      .then(res => res.json())
-      .then(data => setMesses(data));
+      .then(res => {
+         if (!res.ok) throw new Error("Could not fetch messes");
+         return res.json();
+      })
+      .then(data => setMesses(data))
+      .catch(err => {
+         console.error("Admin fetch messes error:", err);
+      });
   }, []);
 
   const deleteUser = async (id) => {
     if (!window.confirm("Delete this user?")) return;
-    await fetch(`http://localhost:5000/api/admin/users/${id}`, {
-      method: "DELETE"
-    });
-    setUsers(users.filter(u => u._id !== id));
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to delete user");
+      setUsers(users.filter(u => u._id !== id));
+    } catch (err) {
+      alert("Failed to delete user: " + err.message);
+    }
   };
 
   const deleteMess = async (id) => {
     if (!window.confirm("Delete this mess?")) return;
-    await fetch(`http://localhost:5000/api/messes/${id}`, {
-      method: "DELETE"
-    });
-    setMesses(messes.filter(m => m._id !== id));
+    try {
+      const res = await fetch(`http://localhost:5000/api/messes/${id}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Failed to delete mess");
+      setMesses(messes.filter(m => m._id !== id));
+    } catch (err) {
+      alert("Failed to delete mess: " + err.message);
+    }
+  };
+
+  const makeAdmin = async (username) => {
+    if (!window.confirm(`Make ${username} an admin?`)) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/make-admin", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ username })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to promote user");
+      }
+      
+      // Update local state to reflect the role change
+      setUsers(users.map(u => u.username === username ? { ...u, role: "admin" } : u));
+      // Optional: alert or toast here if desired
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
 
-      <div className="flex-1 p-8 max-w-6xl mx-auto w-full">
+      <div className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full">
         <h2 className="text-3xl font-bold text-[#5C2E00] mb-6 text-center">
           Admin Dashboard
         </h2>
+
+        {errorMsg && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center">
+             {errorMsg}
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex justify-center gap-4 mb-8">
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-6 py-2 rounded font-bold ${
+            className={`px-6 py-2 rounded font-bold transition-colors ${
               activeTab === "users"
                 ? "bg-[#D2691E] text-white"
-                : "bg-white border"
+                : "bg-white border text-gray-600 hover:bg-gray-50"
             }`}
           >
             Users
           </button>
           <button
             onClick={() => setActiveTab("messes")}
-            className={`px-6 py-2 rounded font-bold ${
+            className={`px-6 py-2 rounded font-bold transition-colors ${
               activeTab === "messes"
                 ? "bg-[#D2691E] text-white"
-                : "bg-white border"
+                : "bg-white border text-gray-600 hover:bg-gray-50"
             }`}
           >
             Messes
@@ -72,36 +130,56 @@ const AdminPanel = () => {
 
         {/* USERS TABLE */}
         {activeTab === "users" && (
-          <div className="overflow-x-auto bg-white shadow rounded">
-            <table className="w-full">
+          <div className="overflow-x-auto bg-white shadow rounded-lg border border-gray-200">
+            <table className="w-full text-left min-w-[600px]">
               <thead className="bg-[#5C2E00] text-white">
                 <tr>
-                  <th className="p-3">Username</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Phone</th>
-                  <th className="p-3">Action</th>
+                  <th className="p-4 font-semibold">Username</th>
+                  <th className="p-4 font-semibold">Email</th>
+                  <th className="p-4 font-semibold">Phone</th>
+                  <th className="p-4 font-semibold">Role</th>
+                  <th className="p-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map(user => (
-                  <tr key={user._id} className="border-b">
-                    <td className="p-3">{user.username}</td>
-                    <td className="p-3">{user.email}</td>
-                    <td className="p-3">{user.phone}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => deleteUser(user._id)}
-                        className="bg-red-600 text-white px-4 py-1 rounded"
-                      >
-                        Delete
-                      </button>
+                  <tr key={user._id} className="border-b hover:bg-orange-50 transition">
+                    <td className="p-4 font-medium text-[#3B1E00]">{user.username}</td>
+                    <td className="p-4 text-gray-600">{user.email}</td>
+                    <td className="p-4 text-gray-600">{user.phone}</td>
+                    <td className="p-4 capitalize">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        user.role === 'admin' ? 'bg-orange-100 text-orange-700' :
+                        user.role === 'mess_owner' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        {user.role !== "admin" && (
+                          <button
+                            onClick={() => makeAdmin(user.username)}
+                            className="bg-green-100 text-green-700 font-bold px-3 py-1.5 rounded hover:bg-green-600 hover:text-white transition text-sm"
+                          >
+                            Make Admin
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteUser(user._id)}
+                          className="bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
-                {users.length === 0 && (
+                {users.length === 0 && !errorMsg && (
                   <tr>
-                    <td colSpan="4" className="p-4 text-center">
-                      No users found
+                    <td colSpan="5" className="p-8 text-center text-gray-500">
+                      No users found.
                     </td>
                   </tr>
                 )}
@@ -112,36 +190,36 @@ const AdminPanel = () => {
 
         {/* MESSES TABLE */}
         {activeTab === "messes" && (
-          <div className="overflow-x-auto bg-white shadow rounded">
-            <table className="w-full">
+          <div className="overflow-x-auto bg-white shadow rounded-lg border border-gray-200">
+            <table className="w-full text-left min-w-[600px]">
               <thead className="bg-[#5C2E00] text-white">
                 <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Location</th>
-                  <th className="p-3">Rating</th>
-                  <th className="p-3">Action</th>
+                  <th className="p-4 font-semibold">Name</th>
+                  <th className="p-4 font-semibold">Location</th>
+                  <th className="p-4 font-semibold">Rating</th>
+                  <th className="p-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {messes.map(mess => (
-                  <tr key={mess._id} className="border-b">
-                    <td className="p-3">{mess.name}</td>
-                    <td className="p-3">{mess.location}</td>
-                    <td className="p-3">{mess.rating}</td>
-                    <td className="p-3">
+                  <tr key={mess._id} className="border-b hover:bg-orange-50 transition">
+                    <td className="p-4 font-medium text-[#3B1E00]">{mess.name}</td>
+                    <td className="p-4 text-gray-600">{mess.location}</td>
+                    <td className="p-4 font-bold text-[#D2691E]">{mess.rating} ⭐</td>
+                    <td className="p-4 text-right">
                       <button
                         onClick={() => deleteMess(mess._id)}
-                        className="bg-red-600 text-white px-4 py-1 rounded"
+                        className="bg-red-100 text-red-600 font-bold px-4 py-1.5 rounded hover:bg-red-600 hover:text-white transition"
                       >
                         Delete
                       </button>
                     </td>
                   </tr>
                 ))}
-                {messes.length === 0 && (
+                {messes.length === 0 && !errorMsg && (
                   <tr>
-                    <td colSpan="4" className="p-4 text-center">
-                      No messes found
+                    <td colSpan="4" className="p-8 text-center text-gray-500">
+                      No messes found.
                     </td>
                   </tr>
                 )}

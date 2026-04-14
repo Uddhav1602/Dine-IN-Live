@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 
 const MessOwnerDashboard = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('menu'); 
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -143,21 +144,21 @@ const MessOwnerDashboard = () => {
         <h2 className="text-xl font-bold">Mess Owner Panel</h2>
         <div className="flex gap-6 text-sm font-medium">
           <Link to="/" className="hover:text-[#D2691E] transition">Home</Link>
-          <button onClick={() => {localStorage.removeItem('token'); window.location.href='/login'}} className="hover:text-red-400 transition">Logout</button>
+          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userId'); localStorage.removeItem('username'); localStorage.removeItem('role'); navigate('/login'); }} className="hover:text-red-400 transition">Logout</button>
         </div>
       </div>
 
       {/* Hero / Profile Section */}
-      <div className="relative w-full h-64 md:h-80 bg-gray-300 group">
+      <div className="relative w-full h-80 bg-gray-300 group">
         <img 
           src={messProfile.bannerImage || "https://images.unsplash.com/photo-1543353071-87d98dec2144?q=80&w=2070&auto=format&fit=crop"} 
           alt="Mess Banner" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute -bottom-16 left-0 right-0 mx-auto w-[90%] md:w-[800px] bg-white p-6 rounded-xl shadow-xl flex flex-col md:flex-row justify-between items-end md:items-center">
+        <div className="absolute top-[80%] md:bottom-[-40px] left-0 right-0 mx-auto w-[95%] md:w-[800px] bg-white p-6 rounded-xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-                <h1 className="text-3xl font-extrabold text-[#5C2E00]">{messProfile.name || "My Mess"}</h1>
-                <p className="text-gray-600 font-medium flex items-center gap-2 mt-1">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-[#5C2E00]">{messProfile.name || "My Mess"}</h1>
+                <p className="text-gray-600 font-medium flex items-center gap-2 mt-1 text-sm md:text-base">
                     📍 {messProfile.location}
                 </p>
                 {messProfile.fullAddress && (
@@ -165,7 +166,7 @@ const MessOwnerDashboard = () => {
                         href={messProfile.fullAddress.startsWith('http') ? messProfile.fullAddress : `https://maps.google.com/?q=${messProfile.fullAddress}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-blue-600 text-sm hover:underline mt-1 block"
+                        className="text-blue-600 text-sm hover:underline mt-1 block max-w-xs break-all truncate"
                     >
                         View Location ↗
                     </a>
@@ -175,10 +176,11 @@ const MessOwnerDashboard = () => {
       </div>
 
       {/* Main Dashboard Area */}
-      <div className="mt-20 flex-1 max-w-6xl mx-auto w-full p-6">
+      {/* We add mt-40 on mobile and mt-20 on desktop to accommodate the absolute positioned card */}
+      <div className="mt-40 md:mt-20 flex-1 max-w-6xl mx-auto w-full p-6">
         
         {/* Tabs */}
-        <div className="flex border-b border-gray-300 mb-6">
+        <div className="flex border-b border-gray-300 mb-6 w-full overflow-x-auto whitespace-nowrap">
             <button 
                 onClick={() => setActiveSection('menu')}
                 className={`py-3 px-6 font-bold text-lg ${activeSection === 'menu' ? 'border-b-4 border-[#D2691E] text-[#D2691E]' : 'text-gray-500 hover:text-[#5C2E00]'}`}
@@ -255,8 +257,8 @@ const MessOwnerDashboard = () => {
                 </div>
 
                 {/* Right Column: Menu List */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="lg:col-span-2 overflow-x-auto">
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-100 min-w-[500px]">
                         <table className="w-full text-left border-collapse">
                             <thead className="bg-[#5C2E00] text-white">
                                 <tr>

@@ -12,6 +12,7 @@ const PartnerInfo = () => {
     ownerPhone: '',
     email: ''
   });
+  const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -20,31 +21,35 @@ const PartnerInfo = () => {
 
   const validateAndSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     
     const { messName, location, fullAddress, ownerPhone, email } = formData;
     
-    // ... (Keep your existing validation logic here: if (!messName) ...) ...
-    const token = localStorage.getItem("token"); // 1. Get the Token
+    if (!messName.trim()) { setErrorMsg("Mess name is required."); return; }
+    if (!location.trim()) { setErrorMsg("City/Area is required."); return; }
+    if (!ownerPhone.trim()) { setErrorMsg("Owner phone is required."); return; }
+    if (!email.trim()) { setErrorMsg("Email is required."); return; }
 
+    const token = localStorage.getItem("token");
     if (!token) {
-        alert("You must be logged in to register a mess!");
-        return;
+      setErrorMsg("You must be logged in to register a mess!");
+      return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:5000/register-mess', { // Ensure URL matches backend
+      const response = await fetch('http://localhost:5000/register-mess', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // 2. Send Token to Backend
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: messName,
-          location: location,
-          fullAddress: fullAddress,
-          ownerPhone: ownerPhone,
-          email: email
+          location,
+          fullAddress,
+          ownerPhone,
+          email
         })
       });
 
@@ -52,14 +57,20 @@ const PartnerInfo = () => {
           const errorData = await response.json();
           throw new Error(errorData.error || "Registration failed");
       }
-      
+
       const data = await response.json();
-      alert('Mess registered successfully!');
+
+      // ✅ Update token & role immediately (no re-login needed)
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role); // "mess_owner"
+      }
+
       navigate('/mess-owner');
 
     } catch (error) {
       console.error('Registration Error:', error);
-      alert('Registration failed: ' + error.message);
+      setErrorMsg('Registration failed: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +90,12 @@ const PartnerInfo = () => {
         <div className="bg-white p-8 w-full max-w-md rounded-xl shadow-2xl">
           <h3 className="text-2xl font-bold text-[#5C2E00] mb-4">Mess Details</h3>
           
+          {errorMsg && (
+            <div className="bg-red-50 border border-red-300 text-red-700 text-sm px-4 py-2 rounded-lg mb-4 text-center">
+              {errorMsg}
+            </div>
+          )}
+
           <form onSubmit={validateAndSubmit}>
             <div className="mb-4 text-left">
               <label htmlFor="messName" className="block font-bold mb-1">Mess Name</label>

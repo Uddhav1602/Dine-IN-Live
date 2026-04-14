@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const Profile = () => {
@@ -37,12 +38,10 @@ const Profile = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // 1. Clear token
     localStorage.removeItem("token");
-    localStorage.removeItem("userId"); // Clear other stored data if any
-    
-    // 2. Redirect to login or home
-    alert("Logged out successfully");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
     navigate("/login");
   };
 
@@ -50,11 +49,7 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FDF5E6] font-sans">
-      {/* Simple Header for Profile Page */}
-      <div className="bg-[#8B5A2B] p-4 text-white flex justify-between items-center shadow-md">
-        <h1 className="text-xl font-bold">My Profile</h1>
-        <Link to="/" className="hover:underline">Home</Link>
-      </div>
+      <Header />
 
       <div className="flex-1 flex justify-center items-center p-6">
         <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[#D2691E]">
