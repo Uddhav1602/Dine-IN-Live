@@ -10,8 +10,33 @@ const Header = () => {
 
   // Re-read token and role on every render (location changes trigger re-render)
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const [currentRole, setCurrentRole] = useState(localStorage.getItem("role"));
   const username = localStorage.getItem("username");
+
+  // Keep currentRole in sync when localStorage changes (e.g. after login/navigation)
+  useEffect(() => {
+    setCurrentRole(localStorage.getItem("role"));
+  }, [location]);
+
+  // Sync role from server profile — catches cases where user was promoted
+  // to admin (or any role change) after their last login
+  useEffect(() => {
+    if (!token) return;
+    fetch("http://localhost:5000/api/user/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.role && data.role !== localStorage.getItem("role")) {
+          localStorage.setItem("role", data.role);
+          setCurrentRole(data.role);
+        }
+      })
+      .catch(() => {}); // Silently ignore network errors
+  }, [token]);
+
+  // Use currentRole everywhere instead of the raw localStorage read
+  const role = currentRole;
 
   const closeMenu = () => setMenuOpen(false);
   const closeDash = () => setDashOpen(false);

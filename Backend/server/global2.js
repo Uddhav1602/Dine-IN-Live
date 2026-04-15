@@ -72,7 +72,7 @@ const Order = mongoose.model("Order", OrderSchema);
 /* ===============================
    3. JWT Middleware
 ================================ */
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -81,12 +81,21 @@ const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.JWT_SECRET || "secretkey", (err, decoded) => {
-    if (err) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
     req.userId = decoded.userId;
-    req.role = decoded.role; // Attach role to request
+
+    // Always fetch the current role from the database instead of trusting
+    // the JWT payload — this ensures role changes (e.g. admin promotion)
+    // take effect immediately without requiring re-login
+    const user = await User.findById(decoded.userId).select("role");
+    if (!user) return res.status(401).json({ error: "User not found" });
+
+    req.role = user.role;
     next();
-  });
+  } catch (err) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 };
 
 // Admin-only middleware
