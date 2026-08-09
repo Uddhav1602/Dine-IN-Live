@@ -4,70 +4,26 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const connectDB = require("../src/config/db");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ===============================
-   1. MongoDB Connection
-================================ */
-mongoose
-  .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/dineinlive")
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+connectDB()
 
 /* ===============================
    2. Schemas & Models
 ================================ */
 
 // ---- User Schema ----
-const UserSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
-  email: { type: String, unique: true, required: true },
-  phone: { type: String, required: true },
-  address: { type: String, required: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ["user", "mess_owner", "admin"], default: "user" },
-});
-const User = mongoose.model("User", UserSchema);
+
 
 // ---- Mess Schema ----
-const MessSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
-  location: { type: String, required: true },
-  fullAddress: { type: String }, // <--- New Field for Google Maps Address
-  ownerPhone: String,
-  email: String,
-  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // <--- Link to User
-  rating: { type: Number, default: 4.0 },
-  menuItems: [
-    {
-      name: String,
-      price: Number,
-      contents: String,
-    },
-  ],
-});
-const Mess = mongoose.model("Mess", MessSchema);
+
 
 // ---- Order Schema ----
-const OrderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  messId: { type: mongoose.Schema.Types.ObjectId, ref: "Mess", required: true },
-  messName: String,
-  items: [
-    {
-      name: String,
-      price: Number,
-      quantity: Number,
-    },
-  ],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, default: "Pending" },
-  createdAt: { type: Date, default: Date.now },
-});
-const Order = mongoose.model("Order", OrderSchema);
+
 
 /* ===============================
    3. JWT Middleware
