@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/global2.js",
-    "dev": "node server/global2.js",
+    "dev": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +14,7 @@
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
