@@ -1,57 +1,89 @@
-const express = require("express")
-const messController = require("../controllers/mess.controllers")
-const auth = require("../middleware/auth.middleware")
+const express = require("express");
 
-const router = express.Router()
+const messController = require("../controllers/mess.controllers");
+const auth = require("../middleware/auth.middleware");
+
+const router = express.Router();
+
+// =====================================
+// Public Mess Routes
+// =====================================
+
+// Get all messes
+router.get(
+    "/",
+    messController.getAllMesses
+);
+
+// Get logged-in owner's mess
+router.get(
+    "/my",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.getMyMess
+);
+
+// Get a single mess
+router.get(
+    "/:id",
+    messController.getMessById
+);
 
 
-router.get("/", messController.getAllmess);
+// =====================================
+// Mess Owner Routes
+// =====================================
 
-router.post("/register-mess", auth.verifyToken,messController.registerMess );
+// Register a new mess
+router.post(
+    "/",
+    auth.verifyToken,
+    messController.registerMess
+);
 
-router.get("/my-mess", auth.verifyToken, messController.getMyMess);
+// Update mess
+router.put(
+    "/:id",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.updateMess
+);
 
-// 🔹 NEW ROUTE: Add Menu Item
-router.post("/:id/menu", auth.verifyToken, messController.addMenu);
+// Delete mess
+router.delete(
+    "/:id",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.deleteMess
+);
 
-// 🔹 NEW ROUTE: Delete Menu Item
-router.delete("/:messId/menu/:itemId", auth.verifyToken, messController.deleteMenu);
 
-// Delete mess (Admin/Owner)
-router.delete("//:id", messController.deleteMess);
+// =====================================
+// Menu Routes
+// =====================================
 
-/* ===============================
-   6. Order Routes (Protected)
-================================ */
+// Add menu item
+router.post(
+    "/:messId/menu",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.addMenuItem
+);
 
-// Place order
-router.post("/place/orders", auth.verifyToken, messController.placeOrder);
+// Update menu item
+router.put(
+    "/:messId/menu/:itemId",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.updateMenuItem
+);
 
-// Get user orders
-router.get("/api/user/orders", auth.verifyToken, messController.getOrders);
+// Delete menu item
+router.delete(
+    "/:messId/menu/:itemId",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    messController.deleteMenuItem
+);
 
-// GET single mess by ID
-router.get("/api/messes/:id", messController.getMessById);
-
-// 🔹 NEW ROUTE: Get User Profile
-router.get("/api/user/profile", auth.verifyToken, messController.getUserProfiles);
-
-/* ===============================
-   7. Admin Routes (auth.verifyToken + verifyAdmin)
-================================ */
-
-// Get all users (Admin only)
-router.get("/api/admin/users", auth.verifyToken, auth.verifyAdmin, messController.getAllUsers);
-
-// Delete a user (Admin only)
-router.delete("/api/admin/users/:id", auth.verifyToken, auth.verifyAdmin, messController.deleteUser);
-
-// Promote a user to admin (Admin only — used to grant admin to other users)
-router.post("/api/admin/make-admin", auth.verifyToken, auth.verifyAdmin, messController.userToAdmin);
-
-// Bootstrap: Make the FIRST admin by username — only works if NO admin exists yet
-// Use this once via: POST http://localhost:5000/api/admin/seed-admin { "username": "yourUsername" }
-
-router.post("/api/admin/seed-admin", messController.seedAdmin);
-
-module.exports = router
+module.exports = router;

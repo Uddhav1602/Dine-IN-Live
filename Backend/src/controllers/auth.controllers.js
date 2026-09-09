@@ -14,20 +14,38 @@ const registerUser = async (req, res) => {
         password
     } = req.body;
 
+    if (
+        !username ||
+        !email ||
+        !phone ||
+        !address ||
+        !password
+    ) {
+        return res.status(400).json({
+            error: "All fields are required"
+        });
+    }
+
     try {
         const existingUser = await User.findOne({
-            $or: [{ username }, { email }]
+            $or: [
+                { username },
+                { email }
+            ]
         });
 
         if (existingUser) {
             return res.status(400).json({
-                error: "User already exists"
+                error: "Username or email already exists"
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(
+            password,
+            10
+        );
 
-        const user = await User.create({
+        await User.create({
             username,
             email,
             phone,
@@ -52,17 +70,25 @@ const registerUser = async (req, res) => {
 // Login User
 // ===============================
 const loginUser = async (req, res) => {
+    const {
+        username,
+        password
+    } = req.body;
 
-    const { username, password } = req.body;
-
-    // console.log(`🔹 Login Attempt for: ${username}`);
+    if (!username || !password) {
+        return res.status(400).json({
+            error: "Username and password are required"
+        });
+    }
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({
+            username
+        });
 
         if (!user) {
             return res.status(401).json({
-                error: "User not found"
+                error: "Invalid username or password"
             });
         }
 
@@ -73,11 +99,10 @@ const loginUser = async (req, res) => {
 
         if (!isMatch) {
             return res.status(401).json({
-                error: "Invalid password"
+                error: "Invalid username or password"
             });
         }
 
-        // Generate JWT
         const token = jwt.sign(
             {
                 userId: user._id
@@ -88,7 +113,6 @@ const loginUser = async (req, res) => {
             }
         );
 
-        // Store JWT in an HttpOnly cookie
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -96,28 +120,72 @@ const loginUser = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        res.json({
-            message: "Login successful",
-            userId: user._id,
-            username: user.username,
-            role: user.role
+        res.status(200).json({
+            message: "Login successful"
         });
-        
-    } catch (err) {
 
-        console.error("❌ SERVER ERROR:", err);
+    } catch (err) {
+        console.error("Login error:", err);
 
         res.status(500).json({
             error: "Login failed due to server error"
         });
-
     }
 };
 
 // ===============================
-// Export Controllers
+// Get Current Authenticated User
 // ===============================
+const getCurrentUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId)
+            .select("-password");
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            authenticated: true,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                role: user.role
+            }
+        });
+
+    } catch (err) {
+        console.error("Get current user error:", err);
+
+        res.status(500).json({
+            error: "Failed to fetch current user"
+        });
+    }
+};
+
+// ===============================
+// Logout User
+// ===============================
+const logoutUser = (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    });
+
+    res.status(200).json({
+        message: "Logged out successfully"
+    });
+};
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    getCurrentUser,
+    logoutUser
 };

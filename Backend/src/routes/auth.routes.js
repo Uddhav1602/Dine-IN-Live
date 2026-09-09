@@ -1,10 +1,34 @@
-const express = require("express")
-const authController = require("../controllers/auth.controllers")
+const express = require("express");
+const authController = require("../controllers/auth.controllers");
+const auth = require("../middleware/auth.middleware");
 
-const router = express.Router()
+const router = express.Router();
 
-router.post("/register",authController.registerUser)
+// Authentication
+router.post("/register", authController.registerUser);
+router.post("/login", authController.loginUser);
+router.post("/logout", authController.logoutUser);
 
-router.post("/login",authController.loginUser)
+// Get currently logged-in user's basic identity
+router.get(
+    "/me",
+    auth.verifyToken,
+    authController.getCurrentUser
+);
 
-module.exports = router
+// Check authentication status
+router.get(
+    "/check-auth",
+    auth.verifyToken,
+    (req, res) => {
+        res.set("Cache-Control", "no-store");
+
+        res.status(200).json({
+            authenticated: true,
+            userId: req.userId,
+            role: req.role
+        });
+    }
+);
+
+module.exports = router;

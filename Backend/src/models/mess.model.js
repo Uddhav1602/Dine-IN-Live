@@ -1,44 +1,91 @@
 const mongoose = require("mongoose");
 
-const MessSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-
-    location: {
-        type: String,
-        required: true
-    },
-
-    fullAddress: {
-        type: String
-    },
-
-    ownerPhone: String,
-
-    email: String,
-
-    ownerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    },
-
-    rating: {
-        type: Number,
-        default: 4.0
-    },
-
-    menuItems: [
-        {
-            name: String,
-            price: Number,
-            contents: String
+const MenuItemSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        price: {
+            type: Number,
+            required: true,
+            min: 0
+        },
+        contents: {
+            type: String,
+            trim: true,
+            default: ""
         }
-    ]
-});
+    },
+    {
+        _id: true
+    }
+);
 
-const messModel = mongoose.model("Mess", MessSchema);
+const MessSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            unique: true,
+            trim: true
+        },
 
-module.exports = messModel;
+        location: {
+            type: String,
+            required: true,
+            trim: true
+        },
+
+        googleMapsLink: {
+            type: String,
+            required: true,
+            trim: true
+        },
+
+        fullAddress: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
+        ownerPhone: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
+        email: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            default: ""
+        },
+
+        ownerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+
+        rating: {
+            type: Number,
+            default: 4.0,
+            min: 0,
+            max: 5
+        },
+
+        menuItems: {
+            type: [MenuItemSchema],
+            default: []
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+const Mess = mongoose.model("Mess", MessSchema);
+
+module.exports = Mess;

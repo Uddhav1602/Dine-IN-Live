@@ -1,142 +1,241 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; 
-import Footer from '../components/Footer'; 
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const PartnerInfo = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    messName: '',
-    location: '', // City/Area
-    fullAddress: '', // New Field: Google Maps Link or Full Address
-    ownerPhone: '',
-    email: ''
+    name: "",
+    location: "",
+    googleMapsLink: "",
+    fullAddress: "",
+    ownerPhone: "",
+    email: "",
   });
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const validateAndSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
-    
-    const { messName, location, fullAddress, ownerPhone, email } = formData;
-    
-    if (!messName.trim()) { setErrorMsg("Mess name is required."); return; }
-    if (!location.trim()) { setErrorMsg("City/Area is required."); return; }
-    if (!ownerPhone.trim()) { setErrorMsg("Owner phone is required."); return; }
-    if (!email.trim()) { setErrorMsg("Email is required."); return; }
+    setError("");
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setErrorMsg("You must be logged in to register a mess!");
+    if (
+      !formData.name ||
+      !formData.location ||
+      !formData.googleMapsLink ||
+      !formData.fullAddress ||
+      !formData.ownerPhone ||
+      !formData.email
+    ) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    setIsSubmitting(true);
+    if (!formData.googleMapsLink.includes("google.com/maps")) {
+      setError("Please enter a valid Google Maps link.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await fetch('http://localhost:5000/register-mess', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: messName,
-          location,
-          fullAddress,
-          ownerPhone,
-          email
-        })
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/messes`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
 
-      if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Registration failed");
-      }
+      console.log("Mess registration successful:", response.data);
 
-      const data = await response.json();
+      navigate("/mess-owner");
+    } catch (err) {
+      console.error("Mess registration error:", err);
 
-      // ✅ Update token & role immediately (no re-login needed)
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role); // "mess_owner"
-      }
-
-      navigate('/mess-owner');
-
-    } catch (error) {
-      console.error('Registration Error:', error);
-      setErrorMsg('Registration failed: ' + error.message);
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to register mess. Please try again."
+      );
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-[#3B1E00] bg-[#8B5A2B] bg-cover bg-center bg-fixed relative">
-      <div className="absolute inset-0 bg-[#D8D4CF]/60 -z-10 pointer-events-none"></div>
+    <>
       <Header />
-      <div className="flex-1 p-12 relative z-10 flex flex-col items-center">
-        
-        <div className="text-center mb-10 max-w-3xl">
-          <h2 className="text-4xl font-bold text-[#5C2E00] mb-4">Complete Your Profile</h2>
-          <p className="text-lg leading-relaxed">Tell us where you are located so customers can find you easily.</p>
-        </div>
 
-        <div className="bg-white p-8 w-full max-w-md rounded-xl shadow-2xl">
-          <h3 className="text-2xl font-bold text-[#5C2E00] mb-4">Mess Details</h3>
-          
-          {errorMsg && (
-            <div className="bg-red-50 border border-red-300 text-red-700 text-sm px-4 py-2 rounded-lg mb-4 text-center">
-              {errorMsg}
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6 md:p-8">
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+            Partner With Us
+          </h1>
+
+          <p className="text-center text-gray-600 mb-8">
+            Register your mess and start managing it through DineInLive.
+          </p>
+
+          {error && (
+            <div className="mb-6 p-3 rounded-lg bg-red-100 text-red-700 text-sm">
+              {error}
             </div>
           )}
 
-          <form onSubmit={validateAndSubmit}>
-            <div className="mb-4 text-left">
-              <label htmlFor="messName" className="block font-bold mb-1">Mess Name</label>
-              <input type="text" id="messName" value={formData.messName} onChange={handleChange} placeholder="e.g. Annapurna Mess" className="w-full p-3 rounded-lg border border-[#D2691E]" />
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Mess Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Mess Name
+              </label>
+
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter mess name"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            <div className="mb-4 text-left">
-              <label htmlFor="location" className="block font-bold mb-1">City / Area</label>
-              <input type="text" id="location" value={formData.location} onChange={handleChange} placeholder="e.g. Kothrud, Pune" className="w-full p-3 rounded-lg border border-[#D2691E]" />
+            {/* Location */}
+            <div>
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Location
+              </label>
+
+              <input
+                type="text"
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Enter location"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            {/* NEW FIELD FOR GOOGLE MAPS / FULL ADDRESS */}
-            <div className="mb-4 text-left">
-              <label htmlFor="fullAddress" className="block font-bold mb-1">Full Address / Google Maps Link</label>
-              <textarea 
-                id="fullAddress" 
-                value={formData.fullAddress} 
-                onChange={handleChange} 
-                placeholder="Paste Google Maps Link or type full address here..." 
-                className="w-full p-3 rounded-lg border border-[#D2691E] h-24 resize-none focus:outline-none focus:ring-2 focus:ring-[#8B4513]/20"
-              ></textarea>
+            {/* Google Maps Link */}
+            <div>
+              <label
+                htmlFor="googleMapsLink"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Google Maps Link
+              </label>
+
+              <input
+                type="url"
+                id="googleMapsLink"
+                name="googleMapsLink"
+                value={formData.googleMapsLink}
+                onChange={handleChange}
+                placeholder="Paste Google Maps link"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <p className="mt-1 text-xs text-gray-500">
+                Open Google Maps, find your mess, click Share → Copy link, and
+                paste it here.
+              </p>
             </div>
 
-            <div className="mb-4 text-left">
-              <label htmlFor="ownerPhone" className="block font-bold mb-1">Owner's Phone</label>
-              <input type="text" id="ownerPhone" value={formData.ownerPhone} onChange={handleChange} placeholder="10-digit Mobile" className="w-full p-3 rounded-lg border border-[#D2691E]" />
+            {/* Full Address */}
+            <div>
+              <label
+                htmlFor="fullAddress"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Full Address
+              </label>
+
+              <textarea
+                id="fullAddress"
+                name="fullAddress"
+                value={formData.fullAddress}
+                onChange={handleChange}
+                placeholder="Enter full address"
+                rows="3"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            <div className="mb-4 text-left">
-              <label htmlFor="email" className="block font-bold mb-1">Email</label>
-              <input type="email" id="email" value={formData.email} onChange={handleChange} placeholder="example@mail.com" className="w-full p-3 rounded-lg border border-[#D2691E]" />
+            {/* Owner Phone */}
+            <div>
+              <label
+                htmlFor="ownerPhone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Owner Phone
+              </label>
+
+              <input
+                type="tel"
+                id="ownerPhone"
+                name="ownerPhone"
+                value={formData.ownerPhone}
+                onChange={handleChange}
+                placeholder="Enter owner phone number"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="w-full p-3.5 mt-2 rounded-lg text-white font-bold bg-[#D2691E] hover:bg-[#8B4513] transition-all">
-              {isSubmitting ? 'Registering...' : 'Create Mess Profile'}
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Email
+              </label>
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Registering..." : "Register Mess"}
             </button>
+
           </form>
         </div>
       </div>
+
       <Footer />
-    </div>
+    </>
   );
 };
 

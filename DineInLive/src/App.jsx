@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 // Pages
 import Home from "./pages/Home";
@@ -15,25 +17,137 @@ import Favorites from "./pages/Favorites";
 import Profile from "./pages/Profile";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/auth/check-auth`,
+          {
+            withCredentials: true,
+            headers: {
+              "Cache-Control": "no-cache"
+            }
+          }
+        );
+
+        setAuthenticated(true);
+
+      } catch (err) {
+        setAuthenticated(false);
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return authenticated
+    ? children
+    : <Navigate to="/login" replace />;
 };
 
-// Only accessible to logged-in users with role="admin"
+
 const AdminRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  if (!token) return <Navigate to="/login" replace />;
-  if (role !== "admin") return <Navigate to="/" replace />;
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/auth/check-auth`,
+          {
+            withCredentials: true,
+            headers: {
+              "Cache-Control": "no-cache"
+            }
+          }
+        );
+
+        setAuthenticated(true);
+        setRole(res.data.role);
+
+      } catch (err) {
+        setAuthenticated(false);
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 };
 
-// Only accessible to mess owners and admins
+
 const MessOwnerRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  if (!token) return <Navigate to="/login" replace />;
-  if (role !== "mess_owner" && role !== "admin") return <Navigate to="/partner" replace />;
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/auth/check-auth`,
+          {
+            withCredentials: true,
+            headers: {
+              "Cache-Control": "no-cache"
+            }
+          }
+        );
+
+        setAuthenticated(true);
+        setRole(res.data.role);
+
+      } catch (err) {
+        setAuthenticated(false);
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "mess_owner" && role !== "admin") {
+    return <Navigate to="/partner" replace />;
+  }
+
   return children;
 };
 
@@ -47,7 +161,14 @@ function App() {
         <Route path="/partner" element={<PartnerWithUs />} />
         <Route path="/partner-info" element={<PartnerInfo />} />
         <Route path="/mess/:id" element={<MessDetails />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected: Favorites */}
         <Route

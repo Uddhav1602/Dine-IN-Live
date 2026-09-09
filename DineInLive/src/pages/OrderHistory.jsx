@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import axios from "axios";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -7,42 +8,33 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem('token');
-
-      // If no token, redirect to login
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       try {
-        const response = await fetch('http://localhost:5000/api/user/orders', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Send the token to the backend
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/orders/my`,
+          {
+            withCredentials: true
           }
-        });
+        );
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
+        setOrders(response.data);
 
-        const data = await response.json();
-        setOrders(data);
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching orders:", err);
+
+        setError(
+          err.response?.data?.error || "Failed to fetch orders"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrders();
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
