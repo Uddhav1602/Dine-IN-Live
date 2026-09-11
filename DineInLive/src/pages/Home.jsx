@@ -80,7 +80,7 @@ const Home = () => {
 
       <Header />
 
-      <div className="flex flex-col bg-[url('/hero-bg.jpg')] bg-cover bg-center py-14 text-center items-center">
+      <div className="flex flex-col bg-[url('/hero-bg.jpg')] bg-cover bg-center py-10 text-center items-center">
           {/* Hero Section */}
         
         <div>

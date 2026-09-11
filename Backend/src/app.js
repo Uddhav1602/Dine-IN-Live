@@ -31,7 +31,7 @@ app.use(cookieParser());
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "https://dine-in-live.vercel.app",
         credentials: true
     })
 );

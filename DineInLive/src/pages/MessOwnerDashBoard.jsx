@@ -16,7 +16,7 @@ const MessOwnerDashboard = () => {
     location: "",
     fullAddress: "",
     bannerImage:
-      "https://images.unsplash.com/photo-1543353071-87d98dec2144?q=80&w=2070&auto=format&fit=crop",
+      "/mess.png",
   });
 
   // Form States
@@ -218,10 +218,10 @@ const MessOwnerDashboard = () => {
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans text-[#3B1E00]">
 
       {/* Header */}
-      <div className="flex justify-between items-center p-4 bg-[#5C2E00] text-white shadow-md">
+      <div className="flex justify-between items-center px-4 sm:px-8 md:px-12 py-4 bg-black text-white shadow-md">
         <h2 className="text-xl font-bold">Mess Owner Panel</h2>
 
-        <div className="flex gap-6 text-sm font-medium">
+        <div className="flex gap-4 text-sm font-medium">
           <Link
             to="/"
             className="hover:text-[#D2691E] transition"
@@ -242,11 +242,10 @@ const MessOwnerDashboard = () => {
       <div className="relative w-full h-80 bg-gray-300 group">
         <img
           src={
-            messProfile.bannerImage ||
-            "https://images.unsplash.com/photo-1543353071-87d98dec2144?q=80&w=2070&auto=format&fit=crop"
+            messProfile.bannerImage
           }
           alt="Mess Banner"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
         />
 
         <div className="absolute top-[80%] md:bottom-[-40px] left-0 right-0 mx-auto w-[95%] md:w-[800px] bg-white p-6 rounded-xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center">
