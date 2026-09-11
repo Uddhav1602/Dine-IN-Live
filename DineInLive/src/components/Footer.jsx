@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#5C2E00] text-white mt-auto">
+    <footer className="bg-[#151720] text-white mt-auto">
       
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 md:px-10 pt-12 pb-8">
@@ -24,25 +24,25 @@ const Footer = () => {
                 href="https://facebook.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-yellow-300 transition-colors duration-200 w-9 h-9 flex items-center justify-center bg-[#4A2400] rounded-full"
+                className=" w-7 h-7 flex items-center justify-center text-[#151720] font-bold bg-white rounded-full"
                 aria-label="Facebook"
               >
                 <span>f</span>
               </a>
-              <a 
+              {/* <a 
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-yellow-300 transition-colors duration-200 w-9 h-9 flex items-center justify-center bg-[#4A2400] rounded-full"
+                className=" w-7 h-7 flex items-center justify-center text-[#151720] font-bold bg-white rounded-full"
                 aria-label="Instagram"
               >
                 <span>📷</span>
-              </a>
+              </a> */}
               <a 
                 href="https://twitter.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-yellow-300 transition-colors duration-200 w-9 h-9 flex items-center justify-center bg-[#4A2400] rounded-full"
+                className="w-7 h-7 flex items-center justify-center text-[#151720] font-bold bg-white rounded-full"
                 aria-label="Twitter"
               >
                 <span>𝕏</span>
@@ -51,7 +51,7 @@ const Footer = () => {
                 href="https://linkedin.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-yellow-300 transition-colors duration-200 w-9 h-9 flex items-center justify-center bg-[#4A2400] rounded-full"
+                className="w-7 h-7 flex items-center justify-center text-[#151720] font-bold bg-white rounded-full"
                 aria-label="LinkedIn"
               >
                 <span>in</span>
@@ -129,8 +129,8 @@ const Footer = () => {
               </li>
               <li className="flex items-start gap-2 justify-center sm:justify-start">
                 <span className="text-yellow-300">📞</span>
-                <a href="tel:+919XXXXXXXXX" className="hover:text-yellow-300 transition-colors duration-200">
-                  +91 9XXXXXXXXX
+                <a href="tel:+918432189669" className="hover:text-yellow-300 transition-colors duration-200">
+                  +91 8432189669
                 </a>
               </li>
             </ul>
@@ -140,7 +140,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Strip */}
-      <div className="bg-[#4A2400] text-center py-5 text-sm text-gray-200 border-t border-[#6B3410]">
+      <div className="bg-[#151720] text-center py-5 text-sm text-gray-200 border-t border-[#2d303c]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-3">
           <p>
             © {new Date().getFullYear()} <span className="font-semibold">Dine In Live</span>. All rights reserved.
