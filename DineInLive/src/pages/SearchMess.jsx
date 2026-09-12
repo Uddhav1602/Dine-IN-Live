@@ -144,10 +144,18 @@ const SearchMess = () => {
 
                   {/* Image */}
 
-                  <div className="h-36 bg-[#F1F5F9] flex items-center justify-center">
-                    <span className="text-5xl">
-                      🍽
-                    </span>
+                  <div className="h-36 bg-[#F1F5F9] flex items-center justify-center overflow-hidden">
+                    {mess.bannerImage ? (
+                      <img
+                        src={mess.bannerImage}
+                        alt={mess.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-5xl">
+                        🍽
+                      </span>
+                    )}
                   </div>
 
                   {/* Mess Information */}

@@ -8,6 +8,7 @@ const MessOwnerDashboard = () => {
   const [activeSection, setActiveSection] = useState('menu');
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   // Profile State
   const [messProfile, setMessProfile] = useState({
@@ -72,6 +73,47 @@ const MessOwnerDashboard = () => {
   }, []);
 
   // --- Handlers ---
+
+  const handleBannerUpload = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setUploadingBanner(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("banner", file);
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/messes/${messProfile._id}/banner`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      setMessProfile((prev) => ({
+        ...prev,
+        bannerImage: response.data.bannerImage,
+      }));
+
+      alert("Banner image uploaded successfully!");
+    } catch (error) {
+      console.error(
+        "Banner upload error:",
+        error.response?.data?.error || error.message
+      );
+
+      alert(
+        error.response?.data?.error ||
+        "Failed to upload banner image."
+      );
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = "";
+    }
+  };
 
   const handleNameChange = (e) => {
     const val = e.target.value;
@@ -218,7 +260,7 @@ const MessOwnerDashboard = () => {
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans text-[#3B1E00]">
 
       {/* Header */}
-      <div className="flex justify-between items-center px-4 sm:px-8 md:px-12 py-4 bg-black text-white shadow-md">
+      <div className="flex justify-between items-center px-4 sm:px-8 md:px-12 py-6 bg-black text-white shadow-md">
         <h2 className="text-xl font-bold">Mess Owner Panel</h2>
 
         <div className="flex gap-4 text-sm font-medium">
@@ -247,6 +289,18 @@ const MessOwnerDashboard = () => {
           alt="Mess Banner"
           className="w-full h-full object-cover object-center"
         />
+
+        <label className="absolute top-4 right-4 bg-green-800 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-black transition">
+          {uploadingBanner ? "Uploading..." : "+ Change Banner"}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleBannerUpload}
+            disabled={uploadingBanner}
+            className="hidden"
+          />
+        </label>
 
         <div className="absolute top-[80%] md:bottom-[-40px] left-0 right-0 mx-auto w-[95%] md:w-[800px] bg-white p-6 rounded-xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>

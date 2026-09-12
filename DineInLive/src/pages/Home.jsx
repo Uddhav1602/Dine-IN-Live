@@ -161,10 +161,18 @@ const Home = () => {
                     className="block bg-white border border-gray-200 rounded-lg overflow-hidden text-left no-underline shadow-sm  hover:shadow-lg transition-shadow duration-200"
                   >
 
-                    <div className="h-36 bg-[#F1F5F9] flex items-center justify-center">
-                      <span className="text-5xl">
-                        🍽
-                      </span>
+                    <div className="h-36 bg-[#F1F5F9] flex items-center justify-center overflow-hidden">
+                      {mess.bannerImage ? (
+                        <img
+                          src={mess.bannerImage}
+                          alt={mess.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-5xl">
+                          🍽
+                        </span>
+                      )}
                     </div>
 
                     <div className="p-4">

@@ -57,7 +57,7 @@ const MessDetails = () => {
         id: mess._id || id,
         name: mess.name,
         location: mess.location,
-        image: null,
+        image: mess.bannerImage || null,
       });
     }
 
@@ -185,28 +185,57 @@ const MessDetails = () => {
 
       <Header />
 
-      {/* Mess Information */}
+      {/* Mess Banner + Information */}
 
-      <div className="w-full border-b border-gray-200 bg-white">
+      <div className="relative w-full h-80 sm:h-96 bg-[#F1F5F9] overflow-hidden">
+        {/* Banner Image */}
+        {mess.bannerImage ? (
+          <img
+            src={mess.bannerImage}
+            alt={mess.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-6xl">🍽</span>
+          </div>
+        )}
 
-        <div className="w-[90%] max-w-4xl mx-auto py-6 flex flex-col sm:flex-row justify-between gap-4">
+        {/* Dark overlay for better card visibility */}
+        <div className="absolute inset-0 bg-black/20"></div>
 
-          <div>
+        {/* Mess Information Cards */}
+        <div className="absolute bottom-4 left-0 right-0 w-[90%] max-w-5xl mx-auto flex flex-col md:flex-row gap-4">
 
+          {/* Left Card */}
+          <div className="flex-1 bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-lg">
             <h1 className="text-2xl sm:text-3xl font-bold text-[#0F0F0F]">
               {mess.name}
             </h1>
 
-            <p className="text-gray-500 text-sm sm:text-base mt-1">
+            <p className="text-gray-600 text-sm sm:text-base mt-2">
               📍 {mess.location}
             </p>
+          </div>
+
+          {/* Right Card */}
+          <div className="md:w-72 bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-lg flex flex-col justify-center gap-3">
+
+            <button
+              onClick={toggleFavorite}
+              className="w-full px-4 py-2.5 rounded-md font-medium text-sm bg-gray-200 text-red-500 hover:bg-gray-300 transition"
+            >
+              {isFavorite
+                ? "♥ Favorited"
+                : "♡ Add to Favorites"}
+            </button>
 
             {mess.googleMapsLink && (
               <a
                 href={mess.googleMapsLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#151720] text-sm font-medium underline mt-1 inline-block"
+                className="w-full text-center text-[#151720] text-sm font-medium underline hover:text-black"
               >
                 View on Map ↗
               </a>
@@ -214,17 +243,7 @@ const MessDetails = () => {
 
           </div>
 
-          <button
-            onClick={toggleFavorite}
-            className="self-start px-4 py-2 rounded-md font-medium text-sm bg-gray-300 text-red-500"
-          >
-            {isFavorite
-              ? "♥ Favorited"
-              : "♡ Add to Favorites"}
-          </button>
-
         </div>
-
       </div>
 
       {/* Main Content */}

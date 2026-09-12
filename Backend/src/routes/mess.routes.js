@@ -1,7 +1,10 @@
 const express = require("express");
 
 const messController = require("../controllers/mess.controllers");
+
 const auth = require("../middleware/auth.middleware");
+
+const upload = require("../middleware/upload.middleware");
 
 const router = express.Router();
 
@@ -47,6 +50,16 @@ router.put(
     auth.verifyToken,
     auth.verifyMessOwner,
     messController.updateMess
+);
+
+// Upload mess banner
+
+router.post(
+    "/:id/banner",
+    auth.verifyToken,
+    auth.verifyMessOwner,
+    upload.single("banner"),
+    messController.uploadBanner
 );
 
 // Delete mess

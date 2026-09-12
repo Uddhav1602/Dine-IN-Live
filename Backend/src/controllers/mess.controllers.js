@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const Mess = require("../models/mess.model");
+const { uploadImage } = require("../services/image.service");
 
 // ===============================
 // Get All Messes
@@ -261,6 +262,62 @@ const updateMess = async (req, res) => {
 };
 
 // ===============================
+// Upload Mess Banner
+// ===============================
+const uploadBanner = async (req, res) => {
+    try {
+        const mess = await Mess.findById(req.params.id);
+
+        if (!mess) {
+            return res.status(404).json({
+                error: "Mess not found"
+            });
+        }
+
+        // Only the mess owner or admin can upload
+        if (
+            mess.ownerId &&
+            mess.ownerId.toString() !== req.userId &&
+            req.role !== "admin"
+        ) {
+            return res.status(403).json({
+                error: "You are not authorized to update this mess"
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                error: "Please select an image"
+            });
+        }
+
+        const fileName = `mess-${mess._id}-banner`;
+
+        const result = await uploadImage(
+            req.file,
+            fileName,
+            "/dine-in-live/mess-banners"
+        );
+
+        mess.bannerImage = result.url;
+
+        await mess.save();
+
+        res.status(200).json({
+            message: "Mess banner uploaded successfully",
+            bannerImage: mess.bannerImage
+        });
+
+    } catch (err) {
+        console.error("Upload mess banner error:", err);
+
+        res.status(500).json({
+            error: "Failed to upload mess banner"
+        });
+    }
+};
+
+// ===============================
 // Add Menu Item
 // ===============================
 const addMenuItem = async (req, res) => {
@@ -495,6 +552,7 @@ module.exports = {
     registerMess,
     getMyMess,
     updateMess,
+    uploadBanner,
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
