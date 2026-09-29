@@ -46,12 +46,18 @@ const Favorites = () => {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1"
               >
                 {/* Image */}
-                <div className="h-48 overflow-hidden relative">
-                   <img 
-                     src={mess.image || "https://images.unsplash.com/photo-1543353071-87d98dec2144?q=80&w=2070&auto=format&fit=crop"} 
-                     alt={mess.name} 
-                     className="w-full h-full object-cover"
-                   />
+                <div className="h-36 bg-[#F1F5F9] flex items-center justify-center overflow-hidden relative">
+                    {mess.image ? (
+                      <img
+                        src={mess.image}
+                        alt={mess.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-5xl">
+                        🍽
+                      </span>
+                    )}
                    <button 
                      onClick={(e) => {
                         e.preventDefault();

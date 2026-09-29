@@ -117,13 +117,13 @@ const Header = () => {
   });
 
   return (
-    <nav className="flex justify-between items-center px-5 py-4 text-white bg-gradient-to-l from-[#8B5A2B] to-[#5C2E00] shadow-md relative z-50">
+    <nav className="flex justify-between items-center px-4 sm:px-8 md:px-12 lg:px-24 py-6 text-white bg-black shadow-md relative z-50">
 
       {/* Logo */}
-      <h2 className="text-2xl font-bold m-0">
+      <h2 className="text-xl sm:text-3xl font-bold m-0">
         <Link
           to="/"
-          className="text-white no-underline hover:opacity-90"
+          className="text-white no-underline"
           onClick={closeMenu}
         >
           🍽 Dine In Live
@@ -135,14 +135,14 @@ const Header = () => {
 
         <Link
           to="/"
-          className="text-white hover:text-yellow-200 transition no-underline"
+          className="text-white no-underline"
         >
           Home
         </Link>
 
         <Link
           to="/partner"
-          className="text-white hover:text-yellow-200 transition no-underline"
+          className="text-white no-underline"
         >
           Partner with Us
         </Link>
@@ -151,7 +151,7 @@ const Header = () => {
         {authenticated && role === "admin" && (
           <Link
             to="/admin"
-            className="text-orange-300 hover:text-orange-200 font-bold transition no-underline"
+            className="text-white font-bold no-underline"
           >
             Admin
           </Link>
@@ -163,7 +163,7 @@ const Header = () => {
             {/* Profile Avatar */}
             <Link
               to="/profile"
-              className="flex items-center gap-2 text-white hover:text-yellow-200 transition no-underline"
+              className="flex items-center gap-2 text-white no-underline"
               title="Profile"
             >
               <div className="w-8 h-8 bg-white/20 border border-white/40 rounded-full flex items-center justify-center text-sm font-bold">
@@ -180,7 +180,7 @@ const Header = () => {
             >
               <button
                 onClick={() => setDashOpen(!dashOpen)}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-white/15 border border-white/30 hover:bg-white/25 transition"
+                className="flex items-center justify-center w-9 h-9 rounded-full border border-white/30"
                 aria-label="Dashboard menu"
               >
                 <span className="flex flex-col gap-[4px] items-center justify-center">
@@ -192,14 +192,12 @@ const Header = () => {
 
               {/* Dropdown */}
               {dashOpen && (
-                <div className="absolute right-0 top-full mt-3 w-52 bg-white rounded-2xl shadow-2xl overflow-hidden z-[999] border border-gray-100">
+                <div className="absolute right-0 top-full mt-3 w-52 bg-white rounded-lg shadow-lg overflow-hidden z-[999] border border-gray-100">
 
-                  {/* Arrow */}
-                  <div className="absolute -top-2 right-3 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100"></div>
-
+                
                   <div className="p-2">
 
-                    <p className="text-xs text-gray-400 font-semibold px-3 pt-2 pb-1 uppercase tracking-widest">
+                    <p className="text-xs text-gray-400 font-semibold px-3 pt-2 pb-1">
                       My Dashboard
                     </p>
 
@@ -229,7 +227,7 @@ const Header = () => {
         {!authenticated && (
           <Link
             to="/login"
-            className="bg-white text-[#5C2E00] font-bold px-5 py-1.5 rounded-full hover:bg-yellow-100 transition no-underline text-sm"
+            className="bg-white text-black font-bold px-5 py-1.5 rounded-full no-underline text-base"
           >
             Sign In
           </Link>
@@ -238,41 +236,23 @@ const Header = () => {
 
       {/* ================= MOBILE HAMBURGER ================= */}
       <button
-        className="md:hidden flex flex-col gap-[5px] p-2 rounded focus:outline-none"
+        className="md:hidden p-2 focus:outline-none"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
-        <span
-          className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-            menuOpen
-              ? "rotate-45 translate-y-[7px]"
-              : ""
-          }`}
-        ></span>
-
-        <span
-          className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-            menuOpen ? "opacity-0" : ""
-          }`}
-        ></span>
-
-        <span
-          className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-            menuOpen
-              ? "-rotate-45 -translate-y-[7px]"
-              : ""
-          }`}
-        ></span>
+        <span className="block w-6 h-0.5 bg-white mb-1.5"></span>
+        <span className="block w-6 h-0.5 bg-white mb-1.5"></span>
+        <span className="block w-6 h-0.5 bg-white"></span>
       </button>
 
       {/* ================= MOBILE MENU ================= */}
       {menuOpen && (
-        <div className="absolute top-full left-0 w-full bg-[#5C2E00] flex flex-col gap-0 shadow-xl z-50 md:hidden">
+        <div className="absolute top-full left-0 w-full bg-black flex flex-col gap-0 shadow-xl z-50 md:hidden">
 
           {/* Home */}
           <Link
             to="/"
-            className="px-6 py-4 text-white font-bold border-b border-white/10 hover:bg-white/10 transition"
+            className="px-6 py-4 text-white font-bold border-b border-white/10 "
             onClick={closeMenu}
           >
             🏡 Home
@@ -281,7 +261,7 @@ const Header = () => {
           {/* Partner */}
           <Link
             to="/partner"
-            className="px-6 py-4 text-white font-bold border-b border-white/10 hover:bg-white/10 transition"
+            className="px-6 py-4 text-white font-bold border-b border-white/10 "
             onClick={closeMenu}
           >
             🤝 Partner with Us
@@ -291,7 +271,7 @@ const Header = () => {
           {authenticated && (
             <>
               {/* Dashboard */}
-              <p className="px-6 pt-4 pb-1 text-xs text-white/50 font-semibold uppercase tracking-widest">
+              <p className="px-6 pt-4 pb-1 text-xs text-white/50 font-semibold ">
                 My Dashboard
               </p>
 
@@ -299,7 +279,7 @@ const Header = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className="px-6 py-3 text-white font-bold border-b border-white/10 hover:bg-white/10 transition"
+                  className="px-6 py-3 text-white font-bold border-b border-white/10 "
                   onClick={closeMenu}
                 >
                   {item.emoji} {item.label}
@@ -310,7 +290,7 @@ const Header = () => {
               {role === "admin" && (
                 <Link
                   to="/admin"
-                  className="px-6 py-3 text-orange-300 font-bold border-b border-white/10 hover:bg-white/10 transition"
+                  className="px-6 py-3 text-orange-300 font-bold border-b border-white/10 "
                   onClick={closeMenu}
                 >
                   ⚙️ Admin
@@ -320,7 +300,7 @@ const Header = () => {
               {/* Profile */}
               <Link
                 to="/profile"
-                className="px-6 py-3 text-yellow-300 font-bold hover:bg-white/10 transition"
+                className="px-6 py-3 text-yellow-300 font-bold "
                 onClick={closeMenu}
               >
                 👤 Profile {username && `(${username})`}
@@ -332,7 +312,7 @@ const Header = () => {
           {!authenticated && (
             <Link
               to="/login"
-              className="px-6 py-4 text-yellow-300 font-bold hover:bg-white/10 transition"
+              className="px-6 py-4 text-yellow-300 font-bold "
               onClick={closeMenu}
             >
               Sign In

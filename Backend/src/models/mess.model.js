@@ -71,9 +71,14 @@ const MessSchema = new mongoose.Schema(
 
         rating: {
             type: Number,
-            default: 4.0,
+            default: 0.0,
             min: 0,
             max: 5
+        },
+        
+        bannerImage: {
+            type: String,
+            default: ""
         },
 
         menuItems: {
